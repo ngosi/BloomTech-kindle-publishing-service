@@ -1,1 +1,183 @@
-PARTICIPANTS: use this file for creating the class diagram in mastery task 01
+@startuml
+class GetBookActivity {
+    -recommendationServiceClient: RecommendationsServiceClient
+    -catalogDao: CatalogDao
+    +execute(GetBookRequest request): GetBookResponse
+}
+
+class RecommendationsServiceClient {
+    -recommendationsService: RecommendationsService
+    +getBookRecommendations(BookGenre genre): List<BookRecommendation>
+}
+
+class RecommendationsService {
+    getBookRecommendations(BookGenre genre): List<BookRecommendation>
+}
+
+class CatalogDao {
+    -dynamoDbMapper: DynamoDBMapper
+    +getBookFromCatalog(String bookId): CatalogItemVersion
+    +getLatestVersionOfBook(String bookId): CatalogItemVersion
+    +deleteBookFromCatalog(String bookId): boolean
+}
+
+class CatalogItemVersion {
+    -@DynamoDBHashKey bookId: String
+    -@DynamoDBRangeKey version: int
+    -inactive: boolean
+    -title: String
+    -author: String
+    -text: String
+    -@DynamoDBTypeConvertedEnum genre: BookGenre
+    {method} POJO
+}
+
+enum BookGenre {
+    FANTASY
+    ROMANCE
+    MYSTERY
+    SCIENCE_FICTION
+    TRAVEL
+    COOKING
+    AUTOBIOGRAPHY
+    ACTION
+    ADVENTURE
+    HISTORICAL_FICTION
+    HORROR
+    LITERARY_FICTION
+    HISTORY
+}
+
+class BookNotFoundException
+
+class GetBookRequest {
+    -bookId: String
+    {method} Builder Pattern
+}
+
+class GetBookResponse {
+    -book: Book
+    -recommendations: List<BookRecommendation>
+    {method} Builder Pattern
+}
+
+class Book {
+    -bookId: String
+    -title: String
+    -author: String
+    -text: String
+    -genre: String
+    -version: int
+    {method} Builder Pattern
+}
+
+class BookRecommendation {
+    -title: String
+    -author: String
+    -asin: String
+    {method} Builder Pattern
+}
+
+class GetPublishingStatusActivity {
+    +execute(GetPublishingStatusRequest publishingStatusRequest): GetPublishingStatusResponse
+}
+
+class GetPublishingStatusRequest {
+    -publishingRecordId: String
+    {method} Builder Pattern
+}
+
+class GetPublishingStatusResponse {
+    -publishingStatusHistory: List<PublishingStatusRecord>
+    {method} Builder Pattern
+}
+
+class PublishingStatusRecord {
+    -status: String
+    -statusMessage: String
+    -bookId: String
+    {method} Builder Pattern
+}
+
+class RemoveBookFromCatalogActivity {
+    -catalogDao: CatalogDao
+    +execute(RemoveBookFromCatalogRequest removeBookFromCatalogRequest): RemoveBookFromCatalogResponse
+}
+
+class RemoveBookFromCatalogRequest {
+    -bookId: String
+    {method} Builder Pattern
+}
+
+class SubmitBookForPublishingRequest {
+    -bookId: String
+    -title: String
+    -author: String
+    -text: String
+    -genre: String
+    {method} Builder Pattern
+}
+
+class SubmitBookForPublishingActivity {
+    -publishingStatusDao: PublishingStatusDao
+    +execute(SubmitBookForPublishingRequest request): SubmitBookForPublishingResponse
+}
+
+class PublishingStatusDao {
+    -dynamoDbMapper: DynamoDBMapper
+    +setPublishingStatus(String publishingRecordId, PublishingRecordStatus publishingRecordStatus, String bookId) PublishingStatusItem
+    +setPublishingStatus(String publishingRecordId, PublishingRecordStatus publishingRecordStatus, String bookId, String message) PublishingStatusItem
+}
+
+class PublishingStatusItem {
+    -@DynamoDBHashKey publishingRecordId: String
+    -@DynamoDBRangeKey status: PublishingRecordStatus
+    -statusMessage: String
+    -bookId: String
+    {method} POJO
+}
+
+enum PublishingRecordStatus {
+    QUEUED
+    IN_PROGRESS
+    FAILED
+    SUCCESSFUL
+}
+
+class SubmitBookForPublishingRequest
+
+class SubmitBookForPublishingResponse {
+    -publishingRecordId: String
+    {method} Builder Pattern
+}
+
+'exception PublishingStatusNotFoundException
+
+GetBookActivity --> RecommendationsServiceClient
+RecommendationsServiceClient --> RecommendationsService
+RecommendationsService --> BookGenre
+GetBookActivity --> CatalogDao
+CatalogDao --> CatalogItemVersion
+CatalogItemVersion --> BookGenre
+CatalogDao --> BookNotFoundException
+
+GetBookActivity --> GetBookRequest
+GetBookActivity --> GetBookResponse
+GetBookResponse --> Book
+GetBookResponse --> BookRecommendation
+
+GetPublishingStatusActivity --> GetPublishingStatusRequest
+GetPublishingStatusActivity --> GetPublishingStatusResponse
+GetPublishingStatusResponse --> PublishingStatusRecord
+
+RemoveBookFromCatalogActivity --> CatalogDao
+RemoveBookFromCatalogActivity --> RemoveBookFromCatalogRequest
+RemoveBookFromCatalogActivity --> RemoveBookFromCatalogResponse
+
+SubmitBookForPublishingActivity --> PublishingStatusDao
+PublishingStatusDao --> PublishingStatusItem
+PublishingStatusDao --> PublishingRecordStatus
+SubmitBookForPublishingActivity --> SubmitBookForPublishingRequest
+SubmitBookForPublishingActivity --> SubmitBookForPublishingResponse
+
+@enduml

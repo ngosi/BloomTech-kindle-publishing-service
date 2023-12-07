@@ -1,1 +1,32 @@
-PARTICIPANTS: use this file for creating the remove book from catalog diagram in mastery task 01
+@startuml
+
+title RemoveBookFromCatalog
+actor Client
+participant APIGateway
+participant Lambda
+participant RemoveBookFromCatalogActivity
+participant CatalogDao
+participant DynamoDBMapper
+database DynamoDB
+
+Client -> APIGateway : DELETE /books/:bookId
+APIGateway -> Lambda
+Lambda -> RemoveBookFromCatalogActivity : execute(request : RemoveBookFromCatalogRequest)
+RemoveBookFromCatalogActivity -> CatalogDao : removeBookFromCatalog(bookId : String)
+RemoveBookFromCatalogActivity -> CatalogDao : removeBookFromCatalog(bookId : String)
+CatalogDao -> DynamoDB : delete(CatalogItemVersion)
+DynamoDB -> DynamoDBMapper : void
+DynamoDBMapper -> DynamoDB : load(bookId : String)
+alt if !null
+    DynamoDB -> CatalogDao : book
+    CatalogDao -> Lambda : throw BookNotFoundException
+    Lambda -> APIGateway
+    APIGateway -> Client : 404 Response
+end
+DynamoDB -> CatalogDao : void
+CatalogDao -> RemoveBookFromCatalogActivity : true
+RemoveBookFromCatalogActivity -> Lambda : RemoveBookFromCatalogResponse true
+Lambda -> APIGateway
+APIGateway -> Client : Book Deleted
+
+@enduml
