@@ -13,16 +13,14 @@ Client -> APIGateway : DELETE /books/:bookId
 APIGateway -> Lambda
 Lambda -> RemoveBookFromCatalogActivity : execute(request : RemoveBookFromCatalogRequest)
 RemoveBookFromCatalogActivity -> CatalogDao : removeBookFromCatalog(bookId : String)
-RemoveBookFromCatalogActivity -> CatalogDao : removeBookFromCatalog(bookId : String)
-CatalogDao -> DynamoDB : delete(CatalogItemVersion)
-DynamoDB -> DynamoDBMapper : void
-DynamoDBMapper -> DynamoDB : load(bookId : String)
-alt if !null
-    DynamoDB -> CatalogDao : book
+CatalogDao -> DynamoDB : query(CatalogItemVersion.class, bookIdQuery)
+DynamoDB -> CatalogDao : List<CatalogItemVersion> results.get(0)
+alt if book == null || book.isInactive()
     CatalogDao -> Lambda : throw BookNotFoundException
     Lambda -> APIGateway
     APIGateway -> Client : 404 Response
 end
+CatalogDao -> DynamoDB : save(book) set book to inactive
 DynamoDB -> CatalogDao : void
 CatalogDao -> RemoveBookFromCatalogActivity : true
 RemoveBookFromCatalogActivity -> Lambda : RemoveBookFromCatalogResponse true
