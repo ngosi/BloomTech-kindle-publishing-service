@@ -47,7 +47,7 @@ public class CatalogDao {
         CatalogItemVersion book = new CatalogItemVersion();
         book.setBookId(bookId);
 
-        DynamoDBQueryExpression<CatalogItemVersion> queryExpression = new DynamoDBQueryExpression()
+        DynamoDBQueryExpression<CatalogItemVersion> queryExpression = new DynamoDBQueryExpression<CatalogItemVersion>()
             .withHashKeyValues(book)
             .withScanIndexForward(false)
             .withLimit(1);
@@ -66,9 +66,7 @@ public class CatalogDao {
     }
 
     public void validateBookExists(String bookId) {
-        CatalogItemVersion book = getLatestVersionOfBook(bookId);
-
-        if (book == null) {
+        if (getLatestVersionOfBook(bookId) == null) {
             throw new BookNotFoundException(String.format("No book found for id: %s", bookId));
         }
     }
