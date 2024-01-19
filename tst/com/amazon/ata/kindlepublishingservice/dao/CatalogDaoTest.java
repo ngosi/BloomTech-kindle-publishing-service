@@ -1,9 +1,7 @@
 package com.amazon.ata.kindlepublishingservice.dao;
 
-import com.amazon.ata.recommendationsservice.types.BookGenre;
 import com.amazon.ata.kindlepublishingservice.dynamodb.models.CatalogItemVersion;
 import com.amazon.ata.kindlepublishingservice.exceptions.BookNotFoundException;
-import com.amazon.ata.kindlepublishingservice.publishing.KindleFormattedBook;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
@@ -16,7 +14,6 @@ import org.mockito.Mock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;

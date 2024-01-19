@@ -1,5 +1,7 @@
 package com.amazon.ata.kindlepublishingservice.dagger;
 
+import com.amazon.ata.kindlepublishingservice.dao.CatalogDao;
+import com.amazon.ata.kindlepublishingservice.dao.PublishingStatusDao;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -22,5 +24,17 @@ public class DataAccessModule {
             .build();
 
         return new DynamoDBMapper(amazonDynamoDBClient);
+    }
+
+    @Singleton
+    @Provides
+    public PublishingStatusDao providePublishingStatusDao(DynamoDBMapper dynamoDBMapper) {
+        return new PublishingStatusDao(dynamoDBMapper);
+    }
+
+    @Singleton
+    @Provides
+    public CatalogDao catalogDao(DynamoDBMapper dynamoDBMapper) {
+        return new CatalogDao(dynamoDBMapper);
     }
 }
